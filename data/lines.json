@@ -1,0 +1,88 @@
+[
+  { "id": "jr-yamanote", "name": "山手線", "operator": "JR東日本", "region": "関東", "color": "#9acd32", "nameRegex": "山手線", "operatorRegex": "東日本旅客鉄道" },
+  { "id": "jr-chuo-rapid", "name": "中央線快速", "operator": "JR東日本", "region": "関東", "color": "#f15a22", "nameRegex": "中央線快速", "operatorRegex": "東日本旅客鉄道" },
+  { "id": "jr-keihin-tohoku", "name": "京浜東北線", "operator": "JR東日本", "region": "関東", "color": "#00bfff", "nameRegex": "京浜東北線", "operatorRegex": "東日本旅客鉄道" },
+  { "id": "jr-saikyo", "name": "埼京線", "operator": "JR東日本", "region": "関東", "color": "#00ac9b", "nameRegex": "埼京線", "operatorRegex": "東日本旅客鉄道" },
+  { "id": "jr-yokohama", "name": "横浜線", "operator": "JR東日本", "region": "関東", "color": "#7fc31c", "nameRegex": "横浜線", "operatorRegex": "東日本旅客鉄道" },
+  { "id": "jr-nambu", "name": "南武線", "operator": "JR東日本", "region": "関東", "color": "#ffd400", "nameRegex": "南武線", "operatorRegex": "東日本旅客鉄道" },
+  { "id": "jr-musashino", "name": "武蔵野線", "operator": "JR東日本", "region": "関東", "color": "#ff7e2e", "nameRegex": "武蔵野線", "operatorRegex": "東日本旅客鉄道" },
+  { "id": "jr-keiyo", "name": "京葉線", "operator": "JR東日本", "region": "関東", "color": "#c9252f", "nameRegex": "京葉線", "operatorRegex": "東日本旅客鉄道" },
+  { "id": "jr-joban", "name": "常磐線", "operator": "JR東日本", "region": "関東", "color": "#00b261", "nameRegex": "常磐線", "operatorRegex": "東日本旅客鉄道" },
+  { "id": "jr-sobu-rapid", "name": "総武快速線", "operator": "JR東日本", "region": "関東", "color": "#0072bc", "nameRegex": "総武快速線", "operatorRegex": "東日本旅客鉄道" },
+  { "id": "jr-utsunomiya", "name": "宇都宮線", "operator": "JR東日本", "region": "関東", "color": "#ff8c00", "nameRegex": "宇都宮線", "operatorRegex": "東日本旅客鉄道" },
+  { "id": "jr-negishi", "name": "根岸線", "operator": "JR東日本", "region": "関東", "color": "#00b2e3", "nameRegex": "根岸線", "operatorRegex": "東日本旅客鉄道" },
+
+  { "id": "jr-tokaido-main", "name": "東海道本線", "operator": "JR東海", "region": "中部", "color": "#f68b1e", "nameRegex": "東海道本線", "operatorRegex": "東海旅客鉄道" },
+  { "id": "jr-chuo-west", "name": "中央本線（名古屋方面）", "operator": "JR東海", "region": "中部", "color": "#faa61a", "nameRegex": "中央西線", "operatorRegex": "東海旅客鉄道" },
+  { "id": "jr-minobu", "name": "身延線", "operator": "JR東海", "region": "中部", "color": "#6d6e71", "nameRegex": "身延線", "operatorRegex": "東海旅客鉄道" },
+  { "id": "jr-iida", "name": "飯田線", "operator": "JR東海", "region": "中部", "color": "#2e7d32", "nameRegex": "飯田線", "operatorRegex": "東海旅客鉄道" },
+  { "id": "jr-gotemba", "name": "御殿場線", "operator": "JR東海", "region": "中部", "color": "#8d6e63", "nameRegex": "御殿場線", "operatorRegex": "東海旅客鉄道" },
+
+  { "id": "jr-osaka-loop", "name": "大阪環状線", "operator": "JR西日本", "region": "関西", "color": "#e60012", "nameRegex": "大阪環状線", "operatorRegex": "西日本旅客鉄道" },
+  { "id": "jr-kobe", "name": "JR神戸線", "operator": "JR西日本", "region": "関西", "color": "#0072bc", "nameRegex": "JR神戸線", "operatorRegex": "西日本旅客鉄道" },
+  { "id": "jr-kyoto", "name": "JR京都線", "operator": "JR西日本", "region": "関西", "color": "#0072bc", "nameRegex": "JR京都線", "operatorRegex": "西日本旅客鉄道" },
+  { "id": "jr-hanwa", "name": "阪和線", "operator": "JR西日本", "region": "関西", "color": "#f68b1e", "nameRegex": "阪和線", "operatorRegex": "西日本旅客鉄道" },
+  { "id": "jr-yamatoji", "name": "大和路線", "operator": "JR西日本", "region": "関西", "color": "#00a650", "nameRegex": "大和路線", "operatorRegex": "西日本旅客鉄道" },
+  { "id": "jr-osaka-higashi", "name": "おおさか東線", "operator": "JR西日本", "region": "関西", "color": "#f7a800", "nameRegex": "おおさか東線", "operatorRegex": "西日本旅客鉄道" },
+  { "id": "jr-nara", "name": "奈良線", "operator": "JR西日本", "region": "関西", "color": "#964b00", "nameRegex": "JR奈良線", "operatorRegex": "西日本旅客鉄道" },
+  { "id": "jr-kosei", "name": "湖西線", "operator": "JR西日本", "region": "関西", "color": "#00a0a8", "nameRegex": "湖西線", "operatorRegex": "西日本旅客鉄道" },
+  { "id": "jr-gakkentoshi", "name": "学研都市線（片町線）", "operator": "JR西日本", "region": "関西", "color": "#f29ec4", "nameRegex": "片町線", "operatorRegex": "西日本旅客鉄道" },
+  { "id": "jr-yumesaki", "name": "ゆめ咲線（桜島線）", "operator": "JR西日本", "region": "関西", "color": "#ff0080", "nameRegex": "桜島線", "operatorRegex": "西日本旅客鉄道" },
+
+  { "id": "metro-marunouchi", "name": "丸ノ内線", "operator": "東京メトロ", "region": "関東", "color": "#f62e36", "nameRegex": "丸ノ内線", "operatorRegex": "東京地下鉄|東京メトロ" },
+  { "id": "metro-ginza", "name": "銀座線", "operator": "東京メトロ", "region": "関東", "color": "#ff9500", "nameRegex": "銀座線", "operatorRegex": "東京地下鉄|東京メトロ" },
+  { "id": "metro-hibiya", "name": "日比谷線", "operator": "東京メトロ", "region": "関東", "color": "#b5b5ac", "nameRegex": "日比谷線", "operatorRegex": "東京地下鉄|東京メトロ" },
+  { "id": "metro-tozai", "name": "東西線", "operator": "東京メトロ", "region": "関東", "color": "#009bbf", "nameRegex": "東西線", "operatorRegex": "東京地下鉄|東京メトロ" },
+  { "id": "metro-chiyoda", "name": "千代田線", "operator": "東京メトロ", "region": "関東", "color": "#00bb85", "nameRegex": "千代田線", "operatorRegex": "東京地下鉄|東京メトロ" },
+  { "id": "metro-yurakucho", "name": "有楽町線", "operator": "東京メトロ", "region": "関東", "color": "#c1a470", "nameRegex": "有楽町線", "operatorRegex": "東京地下鉄|東京メトロ" },
+  { "id": "metro-hanzomon", "name": "半蔵門線", "operator": "東京メトロ", "region": "関東", "color": "#8f76d6", "nameRegex": "半蔵門線", "operatorRegex": "東京地下鉄|東京メトロ" },
+  { "id": "metro-namboku", "name": "南北線", "operator": "東京メトロ", "region": "関東", "color": "#00ada9", "nameRegex": "南北線", "operatorRegex": "東京地下鉄|東京メトロ" },
+  { "id": "metro-fukutoshin", "name": "副都心線", "operator": "東京メトロ", "region": "関東", "color": "#9c5e31", "nameRegex": "副都心線", "operatorRegex": "東京地下鉄|東京メトロ" },
+
+  { "id": "toei-asakusa", "name": "都営浅草線", "operator": "都営地下鉄", "region": "関東", "color": "#e85298", "nameRegex": "浅草線", "operatorRegex": "東京都交通局" },
+  { "id": "toei-mita", "name": "都営三田線", "operator": "都営地下鉄", "region": "関東", "color": "#0079c2", "nameRegex": "三田線", "operatorRegex": "東京都交通局" },
+  { "id": "toei-shinjuku", "name": "都営新宿線", "operator": "都営地下鉄", "region": "関東", "color": "#6cbb5a", "nameRegex": "新宿線", "operatorRegex": "東京都交通局" },
+  { "id": "toei-oedo", "name": "都営大江戸線", "operator": "都営地下鉄", "region": "関東", "color": "#b6007a", "nameRegex": "大江戸線", "operatorRegex": "東京都交通局" },
+
+  { "id": "osaka-midosuji", "name": "御堂筋線", "operator": "Osaka Metro", "region": "関西", "color": "#e5171f", "nameRegex": "御堂筋線", "operatorRegex": "大阪市高速電気軌道" },
+  { "id": "osaka-tanimachi", "name": "谷町線", "operator": "Osaka Metro", "region": "関西", "color": "#522886", "nameRegex": "谷町線", "operatorRegex": "大阪市高速電気軌道" },
+  { "id": "osaka-yotsubashi", "name": "四つ橋線", "operator": "Osaka Metro", "region": "関西", "color": "#0078ba", "nameRegex": "四つ橋線", "operatorRegex": "大阪市高速電気軌道" },
+  { "id": "osaka-chuo", "name": "中央線", "operator": "Osaka Metro", "region": "関西", "color": "#009933", "nameRegex": "中央線", "operatorRegex": "大阪市高速電気軌道" },
+  { "id": "osaka-sennichimae", "name": "千日前線", "operator": "Osaka Metro", "region": "関西", "color": "#e44d93", "nameRegex": "千日前線", "operatorRegex": "大阪市高速電気軌道" },
+  { "id": "osaka-sakaisuji", "name": "堺筋線", "operator": "Osaka Metro", "region": "関西", "color": "#814721", "nameRegex": "堺筋線", "operatorRegex": "大阪市高速電気軌道" },
+  { "id": "osaka-nagahori", "name": "長堀鶴見緑地線", "operator": "Osaka Metro", "region": "関西", "color": "#94d600", "nameRegex": "長堀鶴見緑地線", "operatorRegex": "大阪市高速電気軌道" },
+  { "id": "osaka-imazatosuji", "name": "今里筋線", "operator": "Osaka Metro", "region": "関西", "color": "#ee7b1a", "nameRegex": "今里筋線", "operatorRegex": "大阪市高速電気軌道" },
+
+  { "id": "tokyu-toyoko", "name": "東急東横線", "operator": "東急電鉄", "region": "関東", "color": "#da0442", "nameRegex": "東横線", "operatorRegex": "東京急行電鉄|東急" },
+  { "id": "tokyu-denentoshi", "name": "東急田園都市線", "operator": "東急電鉄", "region": "関東", "color": "#20a288", "nameRegex": "田園都市線", "operatorRegex": "東京急行電鉄|東急" },
+  { "id": "tokyu-meguro", "name": "東急目黒線", "operator": "東急電鉄", "region": "関東", "color": "#009cd2", "nameRegex": "東急目黒線", "operatorRegex": "東京急行電鉄|東急" },
+  { "id": "tokyu-oimachi", "name": "東急大井町線", "operator": "東急電鉄", "region": "関東", "color": "#f39700", "nameRegex": "大井町線", "operatorRegex": "東京急行電鉄|東急" },
+
+  { "id": "odakyu-odawara", "name": "小田急小田原線", "operator": "小田急電鉄", "region": "関東", "color": "#2581c4", "nameRegex": "小田原線", "operatorRegex": "小田急電鉄" },
+  { "id": "odakyu-enoshima", "name": "小田急江ノ島線", "operator": "小田急電鉄", "region": "関東", "color": "#0099d9", "nameRegex": "江ノ島線", "operatorRegex": "小田急電鉄" },
+
+  { "id": "keio-line", "name": "京王線", "operator": "京王電鉄", "region": "関東", "color": "#cf0a5b", "nameRegex": "京王線", "operatorRegex": "京王電鉄" },
+  { "id": "keio-inokashira", "name": "京王井の頭線", "operator": "京王電鉄", "region": "関東", "color": "#e85298", "nameRegex": "井の頭線", "operatorRegex": "京王電鉄" },
+
+  { "id": "seibu-shinjuku", "name": "西武新宿線", "operator": "西武鉄道", "region": "関東", "color": "#ff6e00", "nameRegex": "西武新宿線", "operatorRegex": "西武鉄道" },
+  { "id": "seibu-ikebukuro", "name": "西武池袋線", "operator": "西武鉄道", "region": "関東", "color": "#f39800", "nameRegex": "池袋線", "operatorRegex": "西武鉄道" },
+
+  { "id": "tobu-urbanpark", "name": "東武アーバンパークライン（野田線）", "operator": "東武鉄道", "region": "関東", "color": "#00913a", "nameRegex": "アーバンパークライン", "operatorRegex": "東武鉄道" },
+  { "id": "tobu-nikko", "name": "東武日光線", "operator": "東武鉄道", "region": "関東", "color": "#e2007a", "nameRegex": "東武日光線", "operatorRegex": "東武鉄道" },
+
+  { "id": "keikyu-main", "name": "京急本線", "operator": "京浜急行電鉄", "region": "関東", "color": "#00a0e9", "nameRegex": "本線", "operatorRegex": "京浜急行電鉄" },
+  { "id": "keikyu-airport", "name": "京急空港線", "operator": "京浜急行電鉄", "region": "関東", "color": "#0086cf", "nameRegex": "空港線", "operatorRegex": "京浜急行電鉄" },
+
+  { "id": "hankyu-kobe", "name": "阪急神戸本線", "operator": "阪急電鉄", "region": "関西", "color": "#8b0000", "nameRegex": "神戸本線", "operatorRegex": "阪急電鉄" },
+  { "id": "hankyu-kyoto", "name": "阪急京都本線", "operator": "阪急電鉄", "region": "関西", "color": "#8b0000", "nameRegex": "京都本線", "operatorRegex": "阪急電鉄" },
+  { "id": "hankyu-takarazuka", "name": "阪急宝塚本線", "operator": "阪急電鉄", "region": "関西", "color": "#8b0000", "nameRegex": "宝塚本線", "operatorRegex": "阪急電鉄" },
+
+  { "id": "meitetsu-main", "name": "名鉄名古屋本線", "operator": "名古屋鉄道", "region": "中部", "color": "#e60012", "nameRegex": "名古屋本線", "operatorRegex": "名古屋鉄道" },
+  { "id": "meitetsu-tokoname", "name": "名鉄常滑線", "operator": "名古屋鉄道", "region": "中部", "color": "#e85298", "nameRegex": "常滑線", "operatorRegex": "名古屋鉄道" },
+
+  { "id": "nishitetsu-tenjin", "name": "西鉄天神大牟田線", "operator": "西日本鉄道", "region": "九州", "color": "#d7000f", "nameRegex": "天神大牟田線", "operatorRegex": "西日本鉄道" },
+
+  { "id": "shinkansen-tokaido", "name": "東海道・山陽新幹線（のぞみ）", "operator": "JR東海/JR西日本", "region": "新幹線", "color": "#003893", "nameRegex": "のぞみ", "operatorRegex": "東海旅客鉄道" },
+  { "id": "shinkansen-tohoku", "name": "東北新幹線", "operator": "JR東日本", "region": "新幹線", "color": "#2cb431", "nameRegex": "東北新幹線", "operatorRegex": "東日本旅客鉄道" },
+  { "id": "shinkansen-hokkaido", "name": "北海道新幹線", "operator": "JR北海道", "region": "新幹線", "color": "#008542", "nameRegex": "北海道新幹線" }
+]

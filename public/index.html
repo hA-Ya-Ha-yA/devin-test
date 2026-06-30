@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>路線図メーカー | 日本の鉄道路線を地図に描いて画像化</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <aside id="sidebar">
+        <header>
+          <h1>路線図メーカー</h1>
+          <p class="sub">日本の鉄道路線を選んで地図に描き、画像として保存できます。</p>
+        </header>
+
+        <div class="field">
+          <label for="region">エリア</label>
+          <select id="region"></select>
+        </div>
+
+        <div class="field">
+          <label for="search">路線を検索</label>
+          <input id="search" type="search" placeholder="例: 山手線 / 御堂筋線 / メトロ" autocomplete="off" />
+        </div>
+
+        <div id="line-list" class="line-list"></div>
+
+        <div id="custom" class="field custom">
+          <label for="customName">一覧にない路線（OSMの路線名で検索）</label>
+          <div class="row">
+            <input id="customName" type="text" placeholder="例: 東武東上線" />
+            <button id="customGo" class="btn-secondary">表示</button>
+          </div>
+        </div>
+
+        <div class="options">
+          <h2>表示オプション</h2>
+          <label class="opt"><input type="checkbox" id="optStations" /> 駅を表示</label>
+          <label class="opt">
+            線の太さ
+            <input type="range" id="optWidth" min="2" max="12" value="5" />
+          </label>
+          <label class="opt">
+            背景の地図
+            <select id="optBasemap">
+              <option value="voyager">標準（カラー）</option>
+              <option value="positron">淡色</option>
+              <option value="dark">ダーク</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="actions">
+          <button id="download" class="btn-primary" disabled>画像を作成して保存</button>
+        </div>
+
+        <div id="status" class="status"></div>
+
+        <footer>
+          <p>地図: © OpenStreetMap contributors, © CARTO ／ 路線データ: OpenStreetMap (Overpass)</p>
+        </footer>
+      </aside>
+
+      <main id="map"></main>
+    </div>
+
+    <div id="title-overlay" class="title-overlay hidden"></div>
+
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+    <script src="https://unpkg.com/leaflet-image@0.4.0/leaflet-image.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
