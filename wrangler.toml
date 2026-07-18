@@ -1,0 +1,10 @@
+name = "rail-route-map"
+main = "src/index.js"
+compatibility_date = "2024-11-01"
+
+# Serve the frontend (public/) via Workers Static Assets. Static files are
+# served directly; anything that doesn't match an asset (e.g. /api/*) runs the
+# Worker in src/index.js.
+[assets]
+directory = "./public"
+binding = "ASSETS"
