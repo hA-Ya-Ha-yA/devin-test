@@ -1,15 +1,5 @@
-import express from "express";
-import fs from "node:fs";
-import path from "node:path";
-import crypto from "node:crypto";
-import { fileURLToPath } from "node:url";
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const PORT = process.env.PORT || 3000;
-const CACHE_DIR = path.join(__dirname, "data", "cache");
-const CACHE_TTL_MS = 1000 * 60 * 60 * 24 * 30; // 30 days
-
-fs.mkdirSync(CACHE_DIR, { recursive: true });
+import { Hono } from "hono";
+import lines from "../data/lines.json";
 
 const OVERPASS_ENDPOINTS = [
   "https://overpass-api.de/api/interpreter",
@@ -17,38 +7,11 @@ const OVERPASS_ENDPOINTS = [
   "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
 ];
 
-const lines = JSON.parse(
-  fs.readFileSync(path.join(__dirname, "data", "lines.json"), "utf8")
-);
+const CACHE_MAX_AGE = 60 * 60 * 24 * 30; // 30 days
 
-const app = express();
-app.use(express.static(path.join(__dirname, "public")));
-
-function cacheKey(query) {
-  return crypto.createHash("sha1").update(query).digest("hex");
-}
-
-function readCache(key) {
-  const file = path.join(CACHE_DIR, `${key}.json`);
-  try {
-    const stat = fs.statSync(file);
-    if (Date.now() - stat.mtimeMs > CACHE_TTL_MS) return null;
-    return JSON.parse(fs.readFileSync(file, "utf8"));
-  } catch {
-    return null;
-  }
-}
-
-function writeCache(key, value) {
-  try {
-    fs.writeFileSync(
-      path.join(CACHE_DIR, `${key}.json`),
-      JSON.stringify(value),
-      "utf8"
-    );
-  } catch (e) {
-    console.warn("cache write failed", e.message);
-  }
+async function sha1(str) {
+  const buf = await crypto.subtle.digest("SHA-1", new TextEncoder().encode(str));
+  return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
 async function runOverpass(query) {
@@ -73,6 +36,26 @@ async function runOverpass(query) {
     }
   }
   throw lastErr || new Error("All Overpass endpoints failed");
+}
+
+// Run an Overpass query, backed by the Workers Cache API (30-day TTL).
+async function cachedOverpass(query, ctx) {
+  const cache = caches.default;
+  const key = new Request(`https://rail-route-map.cache/overpass?h=${await sha1(query)}`);
+  const hit = await cache.match(key);
+  if (hit) return await hit.json();
+
+  const raw = await runOverpass(query);
+  const resp = new Response(JSON.stringify(raw), {
+    headers: {
+      "content-type": "application/json",
+      "Cache-Control": `max-age=${CACHE_MAX_AGE}`,
+    },
+  });
+  const put = cache.put(key, resp.clone());
+  if (ctx && ctx.waitUntil) ctx.waitUntil(put);
+  else await put;
+  return raw;
 }
 
 // Build an Overpass query that returns route relations matching name/operator.
@@ -131,49 +114,41 @@ function toGeoJSON(data) {
   };
 }
 
-app.get("/api/lines", (req, res) => {
-  res.json(lines);
-});
+const app = new Hono();
 
-app.get("/api/route", async (req, res) => {
+app.get("/api/lines", (c) => c.json(lines));
+
+app.get("/api/route", async (c) => {
   try {
-    let nameRegex = req.query.name;
-    let operatorRegex = req.query.operator;
-    const id = req.query.id;
+    let nameRegex = c.req.query("name");
+    let operatorRegex = c.req.query("operator");
+    const id = c.req.query("id");
 
     if (id) {
       const line = lines.find((l) => l.id === id);
-      if (!line) return res.status(404).json({ error: "unknown line id" });
+      if (!line) return c.json({ error: "unknown line id" }, 404);
       nameRegex = line.nameRegex;
       operatorRegex = line.operatorRegex;
     }
-    if (!nameRegex) return res.status(400).json({ error: "name or id required" });
+    if (!nameRegex) return c.json({ error: "name or id required" }, 400);
 
     const query = buildQuery({ nameRegex, operatorRegex });
-    const key = cacheKey(query);
-    let raw = readCache(key);
-    if (!raw) {
-      raw = await runOverpass(query);
-      writeCache(key, raw);
-    }
+    const raw = await cachedOverpass(query, c.executionCtx);
     const { geojson, relations } = toGeoJSON(raw);
     if (!geojson.features.length) {
-      return res.status(404).json({ error: "no geometry found", relations });
+      return c.json({ error: "no geometry found", relations }, 404);
     }
-    res.json({ geojson, relations });
+    return c.json({ geojson, relations });
   } catch (e) {
-    console.error(e);
-    res.status(502).json({ error: e.message });
+    return c.json({ error: e.message }, 502);
   }
 });
 
 // Free-text search across the curated list (client also filters, this is a helper).
-app.get("/api/search", (req, res) => {
-  const q = (req.query.q || "").trim();
-  if (!q) return res.json(lines);
-  res.json(lines.filter((l) => (l.name + l.operator + l.region).includes(q)));
+app.get("/api/search", (c) => {
+  const q = (c.req.query("q") || "").trim();
+  if (!q) return c.json(lines);
+  return c.json(lines.filter((l) => (l.name + l.operator + l.region).includes(q)));
 });
 
-app.listen(PORT, () => {
-  console.log(`rail-route-map listening on http://localhost:${PORT}`);
-});
+export default app;

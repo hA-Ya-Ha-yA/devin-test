@@ -15,18 +15,36 @@
 
 - 地図描画: [Leaflet](https://leafletjs.com/) + [CARTO](https://carto.com/) ベースマップ（OpenStreetMap）
 - 路線ジオメトリ: [Overpass API](https://overpass-api.de/)（OpenStreetMap の `type=route` リレーション）
-  - バックエンドが Overpass へ問い合わせて結果を `data/cache/` に 30 日キャッシュします
+  - バックエンド（Cloudflare Worker）が Overpass へ問い合わせ、結果を Cloudflare Cache API に 30 日キャッシュします
 - 画像生成: [leaflet-image](https://github.com/mapbox/leaflet-image) でタイルを描画し、経路をキャンバスに重ね描き
+- 実行基盤: [Hono](https://hono.dev/) 上の [Cloudflare Workers](https://developers.cloudflare.com/workers/)（API）＋ [Workers Static Assets](https://developers.cloudflare.com/workers/static-assets/)（`public/` のフロント配信）
 
-## 起動
+## ローカル開発
 
 ```bash
 npm install
-npm start
-# http://localhost:3000
+npm run dev        # wrangler dev（既定で http://localhost:8787）
 ```
 
-環境変数 `PORT` でポートを変更できます。
+`public/` は Static Assets として配信され、`/api/*` は `src/index.js` の Worker が処理します。
+
+## Cloudflare へのデプロイ
+
+```bash
+# 初回のみ: Cloudflare アカウントにログイン
+npx wrangler login
+
+# デプロイ
+npm run deploy     # = wrangler deploy
+```
+
+設定は `wrangler.toml`（`name` / `main` / `[assets]`）を参照してください。
+GitHub 連携でデプロイする場合の Cloudflare 側設定:
+
+- Deploy command: `npx wrangler deploy`
+- Build command: （不要。`wrangler deploy` がバンドルします）
+
+キャッシュは Cloudflare Cache API を使うため追加のリソース作成は不要です。
 
 ## API
 
