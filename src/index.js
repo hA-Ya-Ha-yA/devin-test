@@ -66,8 +66,10 @@ function buildQuery({ nameRegex, operatorRegex }) {
   const f = filters.join("");
   return `[out:json][timeout:90];
 area["ISO3166-1"="JP"][admin_level=2]->.jp;
-relation${f}(area.jp);
-out geom;`;
+relation${f}(area.jp)->.routes;
+.routes out geom;
+node(r.routes);
+out tags;`;
 }
 
 // Convert an Overpass relation (out geom) into route segments + station points.
@@ -76,6 +78,13 @@ function toGeoJSON(data) {
   const relations = [];
   const seenWays = new Set();
   const seenStations = new Set();
+  // Member nodes are emitted separately (out tags) so we can resolve station names.
+  const nodeNames = new Map();
+  for (const el of data.elements || []) {
+    if (el.type === "node" && el.tags && el.tags.name) {
+      nodeNames.set(el.id, el.tags.name);
+    }
+  }
   for (const el of data.elements || []) {
     if (el.type !== "relation") continue;
     relations.push({ id: el.id, tags: el.tags || {} });
@@ -102,7 +111,11 @@ function toGeoJSON(data) {
         if (m.ref != null) seenStations.add(m.ref);
         features.push({
           type: "Feature",
-          properties: { relId: el.id, station: true, name: (m.tags && m.tags.name) || "" },
+          properties: {
+            relId: el.id,
+            station: true,
+            name: (m.tags && m.tags.name) || nodeNames.get(m.ref) || "",
+          },
           geometry: { type: "Point", coordinates: [m.lon, m.lat] },
         });
       }

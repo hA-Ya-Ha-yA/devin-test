@@ -1,21 +1,12 @@
 "use strict";
 
-const BASEMAPS = {
-  voyager: {
-    url: "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
-    attribution:
-      '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions">CARTO</a>',
-  },
-  positron: {
-    url: "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
-    attribution:
-      '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions">CARTO</a>',
-  },
-  dark: {
-    url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-    attribution:
-      '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions">CARTO</a>',
-  },
+// Simple map appearance: white land, light sea, gray prefecture borders.
+const MAP_STYLE = {
+  land: "#ffffff",
+  sea: "#eef1f4",
+  border: "#9aa4ad",
+  label: "#1a1a1a",
+  labelHalo: "#ffffff",
 };
 
 const state = {
@@ -24,6 +15,7 @@ const state = {
   routeLayer: null,
   stationLayer: null,
   geojson: null,
+  prefectures: null, // prefecture boundary GeoJSON
 };
 
 const map = L.map("map", { preferCanvas: false, zoomControl: true }).setView(
@@ -31,18 +23,22 @@ const map = L.map("map", { preferCanvas: false, zoomControl: true }).setView(
   5
 );
 
-let tileLayer = null;
-function setBasemap(key) {
-  const b = BASEMAPS[key] || BASEMAPS.voyager;
-  if (tileLayer) map.removeLayer(tileLayer);
-  tileLayer = L.tileLayer(b.url, {
-    attribution: b.attribution,
-    subdomains: "abcd",
-    maxZoom: 19,
-    crossOrigin: true,
+let prefLayer = null;
+async function loadPrefectures() {
+  const res = await fetch("data/japan-prefectures.geojson");
+  if (!res.ok) throw new Error("都道府県境界の読み込みに失敗しました");
+  const gj = await res.json();
+  state.prefectures = gj;
+  prefLayer = L.geoJSON(gj, {
+    style: {
+      color: MAP_STYLE.border,
+      weight: 1,
+      fillColor: MAP_STYLE.land,
+      fillOpacity: 1,
+    },
+    interactive: false,
   }).addTo(map);
 }
-setBasemap("voyager");
 
 // ---------- UI helpers ----------
 const el = (id) => document.getElementById(id);
@@ -143,15 +139,28 @@ function drawStations(geojson, color) {
   const pts = geojson.features.filter((f) => f.geometry.type === "Point");
   if (!pts.length) return;
   state.stationLayer = L.layerGroup(
-    pts.map((f) =>
-      L.circleMarker([f.geometry.coordinates[1], f.geometry.coordinates[0]], {
-        radius: 4,
-        color,
-        weight: 2,
-        fillColor: "#ffffff",
-        fillOpacity: 1,
-      }).bindTooltip(f.properties.name || "", { direction: "top" })
-    )
+    pts.map((f) => {
+      const name = (f.properties.name || "").trim();
+      const marker = L.circleMarker(
+        [f.geometry.coordinates[1], f.geometry.coordinates[0]],
+        {
+          radius: 4,
+          color,
+          weight: 2,
+          fillColor: "#ffffff",
+          fillOpacity: 1,
+        }
+      );
+      if (name) {
+        marker.bindTooltip(name, {
+          permanent: true,
+          direction: "right",
+          offset: [6, 0],
+          className: "station-label",
+        });
+      }
+      return marker;
+    })
   ).addTo(map);
 }
 
@@ -201,6 +210,36 @@ async function selectCustom(name) {
 }
 
 // ---------- image export ----------
+function drawPrefecturesOnCanvas(ctx) {
+  if (!state.prefectures) return;
+  ctx.lineJoin = "round";
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = MAP_STYLE.border;
+  ctx.fillStyle = MAP_STYLE.land;
+  for (const f of state.prefectures.features) {
+    const geom = f.geometry;
+    const polys =
+      geom.type === "Polygon"
+        ? [geom.coordinates]
+        : geom.type === "MultiPolygon"
+        ? geom.coordinates
+        : [];
+    for (const poly of polys) {
+      ctx.beginPath();
+      for (const ring of poly) {
+        ring.forEach((c, i) => {
+          const p = map.latLngToContainerPoint([c[1], c[0]]);
+          if (i === 0) ctx.moveTo(p.x, p.y);
+          else ctx.lineTo(p.x, p.y);
+        });
+        ctx.closePath();
+      }
+      ctx.fill("evenodd");
+      ctx.stroke();
+    }
+  }
+}
+
 function drawRouteOnCanvas(ctx, color) {
   if (!state.geojson) return;
   const width = Number(el("optWidth").value);
@@ -218,21 +257,36 @@ function drawRouteOnCanvas(ctx, color) {
     });
     ctx.stroke();
   }
-  if (el("optStations").checked) {
-    for (const f of state.geojson.features) {
-      if (f.geometry.type !== "Point") continue;
-      const p = map.latLngToContainerPoint([
-        f.geometry.coordinates[1],
-        f.geometry.coordinates[0],
-      ]);
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
-      ctx.fillStyle = "#ffffff";
-      ctx.fill();
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = color;
-      ctx.stroke();
-    }
+  if (el("optStations").checked) drawStationsOnCanvas(ctx, color);
+}
+
+function drawStationsOnCanvas(ctx, color) {
+  ctx.textBaseline = "middle";
+  ctx.font =
+    "12px 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif";
+  ctx.lineJoin = "round";
+  for (const f of state.geojson.features) {
+    if (f.geometry.type !== "Point") continue;
+    const p = map.latLngToContainerPoint([
+      f.geometry.coordinates[1],
+      f.geometry.coordinates[0],
+    ]);
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+    ctx.fillStyle = "#ffffff";
+    ctx.fill();
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = color;
+    ctx.stroke();
+
+    const name = (f.properties.name || "").trim();
+    if (!name) continue;
+    const tx = p.x + 7;
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = MAP_STYLE.labelHalo;
+    ctx.strokeText(name, tx, p.y);
+    ctx.fillStyle = MAP_STYLE.label;
+    ctx.fillText(name, tx, p.y);
   }
 }
 
@@ -280,28 +334,29 @@ function exportImage() {
   if (!state.selected) return;
   setStatus("画像を生成中…");
   const color = state.selected.color || "#ff3b30";
-  leafletImage(map, (err, canvas) => {
-    if (err) {
-      setStatus("画像生成に失敗しました: " + err.message, true);
-      return;
-    }
-    const ctx = canvas.getContext("2d");
-    // Redraw the route on top to guarantee it is present and crisp.
-    drawRouteOnCanvas(ctx, color);
-    drawCaption(ctx, canvas);
+  const size = map.getSize();
+  const canvas = document.createElement("canvas");
+  canvas.width = size.x;
+  canvas.height = size.y;
+  const ctx = canvas.getContext("2d");
 
-    canvas.toBlob((blob) => {
-      const a = document.createElement("a");
-      const safe = (state.selected.name || "route").replace(/[\\/:*?"<>|]/g, "_");
-      a.download = `${safe}.png`;
-      a.href = URL.createObjectURL(blob);
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(a.href);
-      setStatus("画像を保存しました。");
-    }, "image/png");
-  });
+  ctx.fillStyle = MAP_STYLE.sea;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  drawPrefecturesOnCanvas(ctx);
+  drawRouteOnCanvas(ctx, color);
+  drawCaption(ctx, canvas);
+
+  canvas.toBlob((blob) => {
+    const a = document.createElement("a");
+    const safe = (state.selected.name || "route").replace(/[\\/:*?"<>|]/g, "_");
+    a.download = `${safe}.png`;
+    a.href = URL.createObjectURL(blob);
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(a.href);
+    setStatus("画像を保存しました。");
+  }, "image/png");
 }
 
 // ---------- wiring ----------
@@ -319,10 +374,14 @@ el("customName").addEventListener("keydown", (e) => {
 });
 el("optStations").addEventListener("change", redrawIfNeeded);
 el("optWidth").addEventListener("input", redrawIfNeeded);
-el("optBasemap").addEventListener("change", (e) => setBasemap(e.target.value));
 el("download").addEventListener("click", exportImage);
 
 async function init() {
+  try {
+    await loadPrefectures();
+  } catch (e) {
+    setStatus(e.message, true);
+  }
   try {
     const res = await fetch("/api/lines");
     state.lines = await res.json();
