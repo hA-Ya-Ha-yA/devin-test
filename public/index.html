@@ -42,18 +42,10 @@
 
         <div class="options">
           <h2>表示オプション</h2>
-          <label class="opt"><input type="checkbox" id="optStations" /> 駅を表示</label>
+          <label class="opt"><input type="checkbox" id="optStations" checked /> 駅名・駅ポイントを表示</label>
           <label class="opt">
             線の太さ
             <input type="range" id="optWidth" min="2" max="12" value="5" />
-          </label>
-          <label class="opt">
-            背景の地図
-            <select id="optBasemap">
-              <option value="voyager">標準（カラー）</option>
-              <option value="positron">淡色</option>
-              <option value="dark">ダーク</option>
-            </select>
           </label>
         </div>
 
@@ -64,7 +56,7 @@
         <div id="status" class="status"></div>
 
         <footer>
-          <p>地図: © OpenStreetMap contributors, © CARTO ／ 路線データ: OpenStreetMap (Overpass)</p>
+          <p>都道府県境界: dataofjapan/land ／ 路線・駅データ: © OpenStreetMap contributors (Overpass)</p>
         </footer>
       </aside>
 
@@ -78,7 +70,6 @@
       integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
       crossorigin=""
     ></script>
-    <script src="https://unpkg.com/leaflet-image@0.4.0/leaflet-image.js"></script>
     <script src="app.js"></script>
   </body>
 </html>

@@ -8,15 +8,16 @@
 
 - 主要な鉄道路線（JR・地下鉄・大手私鉄・新幹線など）をエリア / 検索で選択
 - 一覧にない路線も OpenStreetMap の路線名で自由に検索して表示
-- 線の太さ・背景地図（カラー / 淡色 / ダーク）・駅表示を切り替え
-- 表示中の地図（路線・駅・路線名キャプション入り）をワンクリックで画像保存
+- 地名や道路を含まないシンプルな地図（都道府県の境界線のみ）に描画
+- 路線上に駅ポイントと駅名を表示
+- 表示中の地図（路線・駅名・路線名キャプション入り）をワンクリックで画像保存
 
 ## 仕組み
 
-- 地図描画: [Leaflet](https://leafletjs.com/) + [CARTO](https://carto.com/) ベースマップ（OpenStreetMap）
-- 路線ジオメトリ: [Overpass API](https://overpass-api.de/)（OpenStreetMap の `type=route` リレーション）
+- 地図描画: [Leaflet](https://leafletjs.com/)。背景タイルは使わず、都道府県境界の GeoJSON（`public/data/japan-prefectures.geojson`）のみを描画
+- 路線・駅ジオメトリ: [Overpass API](https://overpass-api.de/)（OpenStreetMap の `type=route` リレーション。メンバーの way を経路、`stop` ロールのノードを駅として抽出）
   - バックエンド（Cloudflare Worker）が Overpass へ問い合わせ、結果を Cloudflare Cache API に 30 日キャッシュします
-- 画像生成: [leaflet-image](https://github.com/mapbox/leaflet-image) でタイルを描画し、経路をキャンバスに重ね描き
+- 画像生成: Canvas に 都道府県境界 → 経路 → 駅ポイント/駅名 → 路線名キャプション の順で描画して PNG 出力
 - 実行基盤: [Hono](https://hono.dev/) 上の [Cloudflare Workers](https://developers.cloudflare.com/workers/)（API）＋ [Workers Static Assets](https://developers.cloudflare.com/workers/static-assets/)（`public/` のフロント配信）
 
 ## ローカル開発
@@ -76,5 +77,5 @@ GitHub 連携でデプロイする場合の Cloudflare 側設定:
 
 ## データ出典
 
-- 地図 / 路線データ: © OpenStreetMap contributors（[ODbL](https://www.openstreetmap.org/copyright)）
-- ベースマップタイル: © CARTO
+- 路線・駅データ: © OpenStreetMap contributors（[ODbL](https://www.openstreetmap.org/copyright)）
+- 都道府県境界: [dataofjapan/land](https://github.com/dataofjapan/land)（japan.geojson を簡略化して同梱）
