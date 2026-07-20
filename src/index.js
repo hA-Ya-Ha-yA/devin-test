@@ -59,8 +59,10 @@ async function cachedOverpass(query, ctx) {
 }
 
 // Build an Overpass query that returns route relations matching name/operator.
+// `railway` is included so lines mapped only as a physical route (not a service
+// pattern) are still found (e.g. 飯田線, 京急本線).
 function buildQuery({ nameRegex, operatorRegex }) {
-  const filters = [`[type=route]`, `[route~"train|subway|light_rail|monorail|tram|funicular"]`];
+  const filters = [`[type=route]`, `[route~"train|subway|light_rail|monorail|tram|funicular|railway"]`];
   if (nameRegex) filters.push(`[name~"${nameRegex}"]`);
   if (operatorRegex) filters.push(`[operator~"${operatorRegex}"]`);
   const f = filters.join("");
@@ -69,7 +71,19 @@ area["ISO3166-1"="JP"][admin_level=2]->.jp;
 relation${f}(area.jp)->.routes;
 .routes out geom;
 node(r.routes);
-out tags;`;
+out tags;
+way(r.routes)->.rw;
+node(w.rw)[railway~"station|halt|stop"];
+out;`;
+}
+
+// Through-running service relations span several lines and pull in foreign
+// stations. They are identified by a 直通 marker in the name or a multi-line
+// ref code such as "DT;Z" or "A;B".
+function isThroughService(tags) {
+  const name = tags.name || "";
+  const ref = tags.ref || "";
+  return name.includes("直通") || ref.includes(";");
 }
 
 // Convert an Overpass relation (out geom) into route segments + station points.
@@ -80,14 +94,27 @@ function toGeoJSON(data) {
   const seenStations = new Set();
   // Member nodes are emitted separately (out tags) so we can resolve station names.
   const nodeNames = new Map();
+  // Station nodes that lie on the member ways but are not relation members.
+  // Used as a fallback for lines whose relations carry no stop members.
+  const wayStations = [];
   for (const el of data.elements || []) {
-    if (el.type === "node" && el.tags && el.tags.name) {
-      nodeNames.set(el.id, el.tags.name);
+    if (el.type !== "node" || !el.tags) continue;
+    if (el.tags.name) nodeNames.set(el.id, el.tags.name);
+    const rw = el.tags.railway;
+    if (
+      typeof el.lat === "number" &&
+      el.tags.name &&
+      (rw === "station" || rw === "halt" || rw === "stop")
+    ) {
+      wayStations.push({ id: el.id, name: el.tags.name, lon: el.lon, lat: el.lat });
     }
   }
+  let stationCount = 0;
   for (const el of data.elements || []) {
     if (el.type !== "relation") continue;
-    relations.push({ id: el.id, tags: el.tags || {} });
+    const tags = el.tags || {};
+    if (isThroughService(tags)) continue;
+    relations.push({ id: el.id, tags });
     for (const m of el.members || []) {
       if (m.type === "way" && Array.isArray(m.geometry)) {
         if (m.ref != null && seenWays.has(m.ref)) continue;
@@ -109,6 +136,7 @@ function toGeoJSON(data) {
       ) {
         if (m.ref != null && seenStations.has(m.ref)) continue;
         if (m.ref != null) seenStations.add(m.ref);
+        stationCount++;
         features.push({
           type: "Feature",
           properties: {
@@ -119,6 +147,19 @@ function toGeoJSON(data) {
           geometry: { type: "Point", coordinates: [m.lon, m.lat] },
         });
       }
+    }
+  }
+  // Fallback: no relation carried stop members, so derive stations from the
+  // station nodes found on the member ways.
+  if (stationCount === 0) {
+    for (const s of wayStations) {
+      if (seenStations.has(s.id)) continue;
+      seenStations.add(s.id);
+      features.push({
+        type: "Feature",
+        properties: { station: true, name: s.name },
+        geometry: { type: "Point", coordinates: [s.lon, s.lat] },
+      });
     }
   }
   return {
