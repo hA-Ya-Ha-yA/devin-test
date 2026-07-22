@@ -10,14 +10,15 @@
 - 一覧にない路線も OpenStreetMap の路線名で自由に検索して表示
 - 地名や道路を含まないシンプルな地図（都道府県の境界線のみ）に描画
 - 路線上に駅ポイントと駅名を表示
-- 表示中の地図（路線・駅名・路線名キャプション入り）をワンクリックで画像保存
+- 路線・駅名・路線名キャプション入りの地図を **1125×1755 の PNG** として保存（路線全体が画像内に収まるよう自動でフィット）
+- 県をまたぐ路線は県を指定でき、その県内の区間だけを画像サイズに収めて出力
 
 ## 仕組み
 
 - 地図描画: [Leaflet](https://leafletjs.com/)。背景タイルは使わず、都道府県境界の GeoJSON（`public/data/japan-prefectures.geojson`）のみを描画
 - 路線・駅ジオメトリ: [Overpass API](https://overpass-api.de/)（OpenStreetMap の `type=route` リレーション。メンバーの way を経路、`stop` ロールのノードを駅として抽出）
   - バックエンド（Cloudflare Worker）が Overpass へ問い合わせ、結果を Cloudflare Cache API に 30 日キャッシュします
-- 画像生成: Canvas に 都道府県境界 → 経路 → 駅ポイント/駅名 → 路線名キャプション の順で描画して PNG 出力
+- 画像生成: 固定サイズ 1125×1755 の Canvas に、対象範囲（路線全体または指定県内の区間）へフィットする独自の Web メルカトル投影で 都道府県境界 → 経路 → 駅ポイント/駅名 → 路線名キャプション の順に描画して PNG 出力
 - 実行基盤: [Hono](https://hono.dev/) 上の [Cloudflare Workers](https://developers.cloudflare.com/workers/)（API）＋ [Workers Static Assets](https://developers.cloudflare.com/workers/static-assets/)（`public/` のフロント配信）
 
 ## ローカル開発
