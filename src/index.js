@@ -92,6 +92,9 @@ function toGeoJSON(data) {
   const relations = [];
   const seenWays = new Set();
   const seenStations = new Set();
+  // Collapse the same station appearing once per direction/loop relation
+  // (up/down or inner/outer carry distinct stop nodes at ~identical coords).
+  const seenStationNames = new Set();
   // Member nodes are emitted separately (out tags) so we can resolve station names.
   const nodeNames = new Map();
   // Station nodes that lie on the member ways but are not relation members.
@@ -137,13 +140,12 @@ function toGeoJSON(data) {
         if (m.ref != null && seenStations.has(m.ref)) continue;
         if (m.ref != null) seenStations.add(m.ref);
         stationCount++;
+        const name = (m.tags && m.tags.name) || nodeNames.get(m.ref) || "";
+        if (name && seenStationNames.has(name)) continue;
+        if (name) seenStationNames.add(name);
         features.push({
           type: "Feature",
-          properties: {
-            relId: el.id,
-            station: true,
-            name: (m.tags && m.tags.name) || nodeNames.get(m.ref) || "",
-          },
+          properties: { relId: el.id, station: true, name },
           geometry: { type: "Point", coordinates: [m.lon, m.lat] },
         });
       }
@@ -155,6 +157,8 @@ function toGeoJSON(data) {
     for (const s of wayStations) {
       if (seenStations.has(s.id)) continue;
       seenStations.add(s.id);
+      if (s.name && seenStationNames.has(s.name)) continue;
+      if (s.name) seenStationNames.add(s.name);
       features.push({
         type: "Feature",
         properties: { station: true, name: s.name },
