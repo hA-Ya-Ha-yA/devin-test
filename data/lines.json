@@ -92,7 +92,7 @@
   { "id": "svc-yokosuka", "name": "横須賀線", "operator": "JR東日本", "region": "運行系統", "color": "#0067c0", "nameRegex": "横須賀線|横須賀・総武快速線", "serviceLine": "JR横須賀線" },
   { "id": "svc-chuo-sobu", "name": "中央・総武線各駅停車", "operator": "JR東日本", "region": "運行系統", "color": "#ffd400", "nameRegex": "中央・総武緩行線", "serviceLine": "JR総武線" },
   { "id": "svc-joban-rapid", "name": "常磐線快速", "operator": "JR東日本", "region": "運行系統", "color": "#00b48d", "nameRegex": "常磐快速線|常磐線快速", "serviceLine": "JR常磐線快速" },
-  { "id": "svc-sotetsu-jr", "name": "相鉄・JR直通線", "operator": "相模鉄道／JR東日本", "region": "運行系統", "color": "#003f98", "nameRegex": "相鉄 .海老名|相鉄本線|相鉄新横浜線", "serviceLine": "相鉄・JR直通線", "corridorKm": 6 },
+  { "id": "svc-sotetsu-jr", "name": "相鉄・JR直通線", "operator": "相模鉄道／JR東日本", "region": "運行系統", "color": "#003f98", "nameRegex": "相鉄 .海老名->新宿.", "serviceLine": "相鉄・JR直通線", "corridorKm": 6 },
   { "id": "svc-biwako", "name": "JR琵琶湖線", "operator": "JR西日本", "region": "運行系統", "color": "#0072bc", "nameRegex": "JR琵琶湖線", "serviceLine": "JR琵琶湖線" },
   { "id": "svc-tozai-w", "name": "JR東西線", "operator": "JR西日本", "region": "運行系統", "color": "#ea5297", "nameRegex": "JR東西線", "serviceLine": "JR東西線" }
 ]
