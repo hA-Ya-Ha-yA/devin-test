@@ -7,6 +7,7 @@
 ## 特徴
 
 - 主要な鉄道路線（JR・地下鉄・大手私鉄・新幹線など）をエリア / 検索で選択
+- 湘南新宿ライン・上野東京ライン・相鉄・JR直通線などの**運行系統**も選択可能（駅の並びは HeartRails 駅データ）
 - 一覧にない路線も OpenStreetMap の路線名で自由に検索して表示
 - 地名や道路を含まないシンプルな地図（都道府県の境界線のみ）に描画
 - 路線上に駅ポイントと駅名を表示
@@ -18,6 +19,7 @@
 - 地図描画: [Leaflet](https://leafletjs.com/)。背景タイルは使わず、都道府県境界の GeoJSON（`public/data/japan-prefectures.geojson`）のみを描画
 - 路線・駅ジオメトリ: [Overpass API](https://overpass-api.de/)（OpenStreetMap の `type=route` リレーション。メンバーの way を経路、`stop` ロールのノードを駅として抽出）
   - バックエンド（Cloudflare Worker）が Overpass へ問い合わせ、結果を Cloudflare Cache API に 30 日キャッシュします
+- 運行系統: 駅の並びは [HeartRails Express](https://express.heartrails.com/api.html) の `getStations` から取得し、OSM 側の経路は駅を結ぶ回廊（既定 3km）内に切り詰めて描画します（直通運転の相手線へ伸びた部分を落とすため）
 - 画像生成: 固定サイズ 1125×1755 の Canvas に、対象範囲（路線全体または指定県内の区間）へフィットする独自の Web メルカトル投影で 都道府県境界 → 経路 → 駅ポイント/駅名 → 路線名キャプション の順に描画して PNG 出力
 - 実行基盤: [Hono](https://hono.dev/) 上の [Cloudflare Workers](https://developers.cloudflare.com/workers/)（API）＋ [Workers Static Assets](https://developers.cloudflare.com/workers/static-assets/)（`public/` のフロント配信）
 
@@ -76,7 +78,23 @@ GitHub 連携でデプロイする場合の Cloudflare 側設定:
 `nameRegex` / `operatorRegex` は Overpass の `name` / `operator` タグに対する正規表現です。
 該当するリレーションのジオメトリをすべて結合して描画します。
 
+運行系統は `serviceLine` に HeartRails の路線名を指定します（駅の並びがそちらを正とし、経路は駅の回廊で切り詰められます）。
+経路が駅を大きく迂回する系統では `corridorKm` で回廊幅を広げられます。
+
+```json
+{
+  "id": "svc-shonan-shinjuku",
+  "name": "湘南新宿ライン",
+  "operator": "JR東日本",
+  "region": "運行系統",
+  "color": "#e21f26",
+  "nameRegex": "湘南新宿ライン",
+  "serviceLine": "JR湘南新宿ライン"
+}
+```
+
 ## データ出典
 
 - 路線・駅データ: © OpenStreetMap contributors（[ODbL](https://www.openstreetmap.org/copyright)）
 - 都道府県境界: [dataofjapan/land](https://github.com/dataofjapan/land)（japan.geojson を簡略化して同梱）
+- 運行系統の駅データ: [HeartRails Express](https://express.heartrails.com/api.html)
