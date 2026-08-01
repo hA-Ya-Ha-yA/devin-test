@@ -130,7 +130,7 @@ function setStatus(msg, isError = false) {
 }
 
 function regionsOf(lines) {
-  const order = ["関東", "中部", "関西", "九州", "新幹線"];
+  const order = ["関東", "中部", "関西", "九州", "新幹線", "運行系統"];
   const set = [...new Set(lines.map((l) => l.region))];
   set.sort((a, b) => {
     const ia = order.indexOf(a);
