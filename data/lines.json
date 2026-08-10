@@ -1,7 +1,7 @@
 [
   { "id": "jr-yamanote", "name": "山手線", "operator": "JR東日本", "region": "関東", "color": "#9acd32", "nameRegex": "山手線", "operatorRegex": "東日本旅客鉄道" },
   { "id": "jr-chuo-rapid", "name": "中央線快速", "operator": "JR東日本", "region": "関東", "color": "#f15a22", "nameRegex": "中央線快速", "operatorRegex": "東日本旅客鉄道" },
-  { "id": "jr-keihin-tohoku", "name": "京浜東北線", "operator": "JR東日本", "region": "関東", "color": "#00bfff", "nameRegex": "京浜東北線", "operatorRegex": "東日本旅客鉄道" },
+  { "id": "jr-keihin-tohoku-negishi", "name": "京浜東北・根岸線", "operator": "JR東日本", "region": "関東", "color": "#00bfff", "nameRegex": "京浜東北線|根岸線", "operatorRegex": "東日本旅客鉄道" },
   { "id": "jr-saikyo", "name": "埼京線", "operator": "JR東日本", "region": "関東", "color": "#00ac9b", "nameRegex": "埼京線", "operatorRegex": "東日本旅客鉄道" },
   { "id": "jr-yokohama", "name": "横浜線", "operator": "JR東日本", "region": "関東", "color": "#7fc31c", "nameRegex": "横浜線", "operatorRegex": "東日本旅客鉄道" },
   { "id": "jr-nambu", "name": "南武線", "operator": "JR東日本", "region": "関東", "color": "#ffd400", "nameRegex": "南武線", "operatorRegex": "東日本旅客鉄道|JR東日本" },
@@ -10,7 +10,6 @@
   { "id": "jr-joban", "name": "常磐線", "operator": "JR東日本", "region": "関東", "color": "#00b261", "nameRegex": "常磐線", "operatorRegex": "東日本旅客鉄道" },
   { "id": "jr-sobu-rapid", "name": "総武快速線", "operator": "JR東日本", "region": "関東", "color": "#0072bc", "nameRegex": "総武快速線", "operatorRegex": "東日本旅客鉄道" },
   { "id": "jr-utsunomiya", "name": "宇都宮線", "operator": "JR東日本", "region": "関東", "color": "#ff8c00", "nameRegex": "宇都宮線", "operatorRegex": "東日本旅客鉄道" },
-  { "id": "jr-negishi", "name": "根岸線", "operator": "JR東日本", "region": "関東", "color": "#00b2e3", "nameRegex": "根岸線", "operatorRegex": "東日本旅客鉄道" },
 
   { "id": "jr-tokaido-main", "name": "東海道本線", "operator": "JR東海", "region": "中部", "color": "#f68b1e", "nameRegex": "東海道本線", "operatorRegex": "東海旅客鉄道" },
   { "id": "jr-chuo-west", "name": "中央本線（名古屋方面）", "operator": "JR東海", "region": "中部", "color": "#faa61a", "nameRegex": "中央西線", "operatorRegex": "東海旅客鉄道" },
