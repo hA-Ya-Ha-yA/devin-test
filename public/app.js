@@ -517,6 +517,10 @@ el("prefecture").addEventListener("change", () => {
   if (b.isValid()) map.fitBounds(b, { padding: [40, 40] });
 });
 
+document.querySelector(".sheet-handle")?.addEventListener("click", () => {
+  el("sidebar").classList.toggle("collapsed");
+});
+
 async function init() {
   try {
     await loadPrefectures();
