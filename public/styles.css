@@ -187,8 +187,72 @@ footer p {
 
 .leaflet-container { font-family: inherit; }
 
+.sheet-handle {
+  display: none;
+}
+
 @media (max-width: 760px) {
-  #app { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
-  #sidebar { max-height: 48vh; }
-  #map { height: 52vh; }
+  #app { display: block; position: relative; height: 100vh; overflow: hidden; }
+  #map { position: absolute; inset: 0; height: 100vh; z-index: 0; }
+  #sidebar {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    max-height: 55vh;
+    min-height: 160px;
+    border-right: none;
+    border-top: 1px solid var(--border);
+    border-radius: 14px 14px 0 0;
+    padding: 6px 14px 14px;
+    background: var(--panel);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+    z-index: 1000;
+    transition: max-height 0.2s ease;
+  }
+  #sidebar.collapsed {
+    max-height: 26px;
+    min-height: 0;
+    overflow: hidden;
+    padding-bottom: 0;
+  }
+
+  .sheet-handle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 4px 0 6px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    flex: 0 0 auto;
+  }
+  .sheet-handle span {
+    display: block;
+    width: 44px;
+    height: 5px;
+    background: var(--muted);
+    border-radius: 3px;
+    opacity: 0.5;
+  }
+
+  .line-list {
+    max-height: 32vh;
+    min-height: 120px;
+    overflow-y: auto;
+    flex: 0 0 auto;
+  }
+
+  #sidebar header h1 { font-size: 18px; }
+  #sidebar header .sub { font-size: 11px; margin-top: 4px; }
+  .field label { font-size: 11px; margin-bottom: 4px; }
+  select, input[type="text"], input[type="search"] { padding: 8px 10px; font-size: 13px; }
+  .btn-primary, .btn-secondary { padding: 10px 12px; font-size: 13px; }
+  .line-item { padding: 7px 9px; }
+  .line-item .name { font-size: 13px; }
 }
