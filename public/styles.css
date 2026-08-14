@@ -164,21 +164,48 @@ footer p {
 
 #map { height: 100vh; background: #eef1f4; }
 
-.station-label.leaflet-tooltip {
+.station-label-wrap {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  pointer-events: none;
+}
+.station-name {
+  display: inline-block;
+  position: absolute;
   background: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.12);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
   border-radius: 5px;
   padding: 2px 5px;
-  margin: 0;
   color: #1a1a1a;
   font-size: 11px;
   font-weight: 600;
   white-space: nowrap;
   pointer-events: none;
   user-select: none;
+  line-height: 1.2;
 }
-.station-label.leaflet-tooltip::before { display: none; }
+.station-name.station-right {
+  left: 0;
+  top: 50%;
+  transform: translate(5px, -50%);
+}
+.station-name.station-left {
+  right: 0;
+  top: 50%;
+  transform: translate(-5px, -50%);
+}
+.station-name.station-top {
+  left: 50%;
+  bottom: 0;
+  transform: translate(-50%, calc(-100% - 5px));
+}
+.station-name.station-bottom {
+  left: 50%;
+  top: 0;
+  transform: translate(-50%, 5px);
+}
 
 .title-overlay {
   position: absolute;
@@ -258,7 +285,7 @@ footer p {
   .btn-primary, .btn-secondary { padding: 10px 12px; font-size: 13px; }
   .line-item { padding: 7px 9px; }
   .line-item .name { font-size: 13px; }
-  .station-label.leaflet-tooltip {
+  .station-name {
     font-size: 10px;
     padding: 1px 4px;
     border-radius: 4px;

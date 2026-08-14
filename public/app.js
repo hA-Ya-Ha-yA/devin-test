@@ -227,41 +227,59 @@ function drawGeoJSON(geojson, color) {
   if (b.isValid()) map.fitBounds(b, { padding: [40, 40] });
 }
 
+function escapeHtml(str) {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 function drawStations(geojson, color) {
   const pts = geojson.features.filter((f) => f.geometry.type === "Point");
   if (!pts.length) return;
+  const isMobile = window.matchMedia && window.matchMedia("(max-width: 760px)").matches;
+  const leadPx = isMobile ? 12 : 16;
   const DIRS = [
-    { direction: "right", offset: [10, 0] },
-    { direction: "left", offset: [-10, 0] },
-    { direction: "top", offset: [0, -12] },
-    { direction: "bottom", offset: [0, 12] },
+    { cls: "right", offset: L.point(leadPx, 0) },
+    { cls: "left", offset: L.point(-leadPx, 0) },
+    { cls: "top", offset: L.point(0, -leadPx) },
+    { cls: "bottom", offset: L.point(0, leadPx) },
   ];
-  state.stationLayer = L.layerGroup(
-    pts.map((f, i) => {
-      const name = (f.properties.name || "").trim();
-      const marker = L.circleMarker(
-        [f.geometry.coordinates[1], f.geometry.coordinates[0]],
-        {
-          radius: 4.5,
-          color,
-          weight: 2,
-          fillColor: "#ffffff",
-          fillOpacity: 1,
-        }
-      );
-      if (name) {
-        const cfg = DIRS[i % DIRS.length];
-        marker.bindTooltip(name, {
-          permanent: true,
-          direction: cfg.direction,
-          offset: cfg.offset,
-          className: "station-label",
-          opacity: 1,
-        });
-      }
-      return marker;
-    })
-  ).addTo(map);
+  const layer = L.layerGroup();
+  pts.forEach((f, i) => {
+    const name = (f.properties.name || "").trim();
+    const lat = f.geometry.coordinates[1];
+    const lng = f.geometry.coordinates[0];
+    const stationLatLng = L.latLng(lat, lng);
+    L.circleMarker(stationLatLng, {
+      radius: 4.5,
+      color,
+      weight: 2,
+      fillColor: "#ffffff",
+      fillOpacity: 1,
+    }).addTo(layer);
+    if (!name) return;
+    const cfg = DIRS[i % DIRS.length];
+    const stationCp = map.latLngToContainerPoint(stationLatLng);
+    const labelCp = stationCp.add(cfg.offset);
+    const labelLatLng = map.containerPointToLatLng(labelCp);
+    L.polyline([stationLatLng, labelLatLng], {
+      color: "#1a1a1a",
+      weight: 1,
+      opacity: 0.8,
+      dashArray: "3,3",
+    }).addTo(layer);
+    const icon = L.divIcon({
+      className: "station-label-wrap",
+      html: `<span class="station-name station-${cfg.cls}">${escapeHtml(name)}</span>`,
+      iconSize: [1, 1],
+      iconAnchor: [0, 0],
+    });
+    L.marker(labelLatLng, { icon, keyboard: false, zIndexOffset: 1000 }).addTo(layer);
+  });
+  state.stationLayer = layer.addTo(map);
 }
 
 async function selectLine(line) {
@@ -401,11 +419,14 @@ function drawStationsOnCanvas(ctx, color, proj) {
   ctx.textBaseline = "middle";
   ctx.font = "16px 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif";
   ctx.lineJoin = "round";
+  const LEAD = 14;
+  const pad = 5;
+  const boxH = 22;
   const LABEL_DIRS = [
-    { align: "left", tx: 11, ty: 0 },
-    { align: "right", tx: -11, ty: 0 },
-    { align: "center", tx: 0, ty: -15 },
-    { align: "center", tx: 0, ty: 15 },
+    { align: "left",  textDx: LEAD + pad,       textDy: 0,              leadDx: LEAD,  leadDy: 0 },
+    { align: "right", textDx: -(LEAD + pad),    textDy: 0,              leadDx: -LEAD, leadDy: 0 },
+    { align: "center", textDx: 0,               textDy: -(LEAD + boxH / 2), leadDx: 0,     leadDy: -LEAD },
+    { align: "center", textDx: 0,               textDy: LEAD + boxH / 2,   leadDx: 0,     leadDy: LEAD },
   ];
   let idx = 0;
   for (const f of state.geojson.features) {
@@ -425,19 +446,33 @@ function drawStationsOnCanvas(ctx, color, proj) {
       continue;
     }
     const dir = LABEL_DIRS[idx % LABEL_DIRS.length];
-    const tx = p.x + dir.tx;
-    const ty = p.y + dir.ty;
+    const tx = p.x + dir.textDx;
+    const ty = p.y + dir.textDy;
+    const leadX = p.x + dir.leadDx;
+    const leadY = p.y + dir.leadDy;
     const tw = ctx.measureText(name).width;
-    const pad = 5;
     const boxW = tw + pad * 2;
-    const boxH = 22;
     const boxX =
       dir.align === "left"
-        ? tx - pad
+        ? leadX
         : dir.align === "right"
-        ? tx - tw - pad
-        : tx - tw / 2 - pad;
-    const boxY = ty - boxH / 2;
+        ? leadX - boxW
+        : leadX - boxW / 2;
+    const boxY =
+      dir.align === "center"
+        ? dir.textDy < 0
+          ? leadY - boxH
+          : leadY
+        : leadY - boxH / 2;
+
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y);
+    ctx.lineTo(leadX, leadY);
+    ctx.setLineDash([3, 3]);
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = "#1a1a1a";
+    ctx.stroke();
+    ctx.setLineDash([]);
 
     ctx.fillStyle = "#ffffff";
     roundRect(ctx, boxX, boxY, boxW, boxH, 5);
