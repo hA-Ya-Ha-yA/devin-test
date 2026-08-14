@@ -230,13 +230,19 @@ function drawGeoJSON(geojson, color) {
 function drawStations(geojson, color) {
   const pts = geojson.features.filter((f) => f.geometry.type === "Point");
   if (!pts.length) return;
+  const DIRS = [
+    { direction: "right", offset: [10, 0] },
+    { direction: "left", offset: [-10, 0] },
+    { direction: "top", offset: [0, -12] },
+    { direction: "bottom", offset: [0, 12] },
+  ];
   state.stationLayer = L.layerGroup(
-    pts.map((f) => {
+    pts.map((f, i) => {
       const name = (f.properties.name || "").trim();
       const marker = L.circleMarker(
         [f.geometry.coordinates[1], f.geometry.coordinates[0]],
         {
-          radius: 4,
+          radius: 4.5,
           color,
           weight: 2,
           fillColor: "#ffffff",
@@ -244,11 +250,13 @@ function drawStations(geojson, color) {
         }
       );
       if (name) {
+        const cfg = DIRS[i % DIRS.length];
         marker.bindTooltip(name, {
           permanent: true,
-          direction: "right",
-          offset: [6, 0],
+          direction: cfg.direction,
+          offset: cfg.offset,
           className: "station-label",
+          opacity: 1,
         });
       }
       return marker;
@@ -391,10 +399,18 @@ function drawRouteOnCanvas(ctx, color, proj) {
 
 function drawStationsOnCanvas(ctx, color, proj) {
   ctx.textBaseline = "middle";
-  ctx.font = "18px 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif";
+  ctx.font = "16px 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif";
   ctx.lineJoin = "round";
+  const LABEL_DIRS = [
+    { align: "left", tx: 11, ty: 0 },
+    { align: "right", tx: -11, ty: 0 },
+    { align: "center", tx: 0, ty: -15 },
+    { align: "center", tx: 0, ty: 15 },
+  ];
+  let idx = 0;
   for (const f of state.geojson.features) {
     if (f.geometry.type !== "Point") continue;
+    const name = (f.properties.name || "").trim();
     const p = proj(f.geometry.coordinates[1], f.geometry.coordinates[0]);
     ctx.beginPath();
     ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
@@ -404,15 +420,38 @@ function drawStationsOnCanvas(ctx, color, proj) {
     ctx.strokeStyle = color;
     ctx.stroke();
 
-    const name = (f.properties.name || "").trim();
-    if (!name) continue;
-    const tx = p.x + 9;
-    ctx.lineWidth = 4;
+    if (!name) {
+      idx++;
+      continue;
+    }
+    const dir = LABEL_DIRS[idx % LABEL_DIRS.length];
+    const tx = p.x + dir.tx;
+    const ty = p.y + dir.ty;
+    const tw = ctx.measureText(name).width;
+    const pad = 5;
+    const boxW = tw + pad * 2;
+    const boxH = 22;
+    const boxX =
+      dir.align === "left"
+        ? tx - pad
+        : dir.align === "right"
+        ? tx - tw - pad
+        : tx - tw / 2 - pad;
+    const boxY = ty - boxH / 2;
+
+    ctx.fillStyle = "#ffffff";
+    roundRect(ctx, boxX, boxY, boxW, boxH, 5);
+    ctx.fill();
+
+    ctx.textAlign = dir.align;
+    ctx.lineWidth = 3;
     ctx.strokeStyle = MAP_STYLE.labelHalo;
-    ctx.strokeText(name, tx, p.y);
+    ctx.strokeText(name, tx, ty);
     ctx.fillStyle = MAP_STYLE.label;
-    ctx.fillText(name, tx, p.y);
+    ctx.fillText(name, tx, ty);
+    idx++;
   }
+  ctx.textAlign = "left";
 }
 
 function drawCaption(ctx, canvas) {
