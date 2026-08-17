@@ -236,17 +236,57 @@ function escapeHtml(str) {
     .replace(/'/g, "&#39;");
 }
 
+function getProjectedBounds(geojson, project) {
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  function add(p) {
+    if (p.x < minX) minX = p.x;
+    if (p.x > maxX) maxX = p.x;
+    if (p.y < minY) minY = p.y;
+    if (p.y > maxY) maxY = p.y;
+  }
+  for (const f of geojson.features) {
+    const geom = f.geometry;
+    if (geom.type === "Point") {
+      add(project(geom.coordinates[1], geom.coordinates[0]));
+    } else if (geom.type === "LineString") {
+      for (const [lng, lat] of geom.coordinates) add(project(lat, lng));
+    } else if (geom.type === "MultiLineString") {
+      for (const ring of geom.coordinates) {
+        for (const [lng, lat] of ring.coordinates || ring) add(project(lat, lng));
+      }
+    }
+  }
+  return { minX, minY, maxX, maxY };
+}
+
+function getLabelDirNames(geojson, project) {
+  const b = getProjectedBounds(geojson, project);
+  const w = b.maxX - b.minX;
+  const h = b.maxY - b.minY;
+  // Horizontal routes get top/bottom labels; vertical routes get left/right.
+  if (w > h * 1.2) return ["top", "bottom"];
+  if (h > w * 1.2) return ["right", "left"];
+  return ["right", "left", "top", "bottom"];
+}
+
 function drawStations(geojson, color) {
   const pts = geojson.features.filter((f) => f.geometry.type === "Point");
   if (!pts.length) return;
   const isMobile = window.matchMedia && window.matchMedia("(max-width: 760px)").matches;
   const leadPx = isMobile ? 12 : 16;
-  const DIRS = [
-    { cls: "right", offset: L.point(leadPx, 0) },
-    { cls: "left", offset: L.point(-leadPx, 0) },
-    { cls: "top", offset: L.point(0, -leadPx) },
-    { cls: "bottom", offset: L.point(0, leadPx) },
-  ];
+  const targetZoom =
+    state.routeLayer && state.routeLayer.getBounds().isValid()
+      ? map.getBoundsZoom(state.routeLayer.getBounds(), false, L.point(40, 40))
+      : map.getZoom();
+  const dirNames = getLabelDirNames(geojson, (lat, lng) =>
+    map.project(L.latLng(lat, lng), targetZoom)
+  );
+  const offsetFor = {
+    right: L.point(leadPx, 0),
+    left: L.point(-leadPx, 0),
+    top: L.point(0, -leadPx),
+    bottom: L.point(0, leadPx),
+  };
   const layer = L.layerGroup();
   pts.forEach((f, i) => {
     const name = (f.properties.name || "").trim();
@@ -261,10 +301,10 @@ function drawStations(geojson, color) {
       fillOpacity: 1,
     }).addTo(layer);
     if (!name) return;
-    const cfg = DIRS[i % DIRS.length];
-    const stationCp = map.latLngToContainerPoint(stationLatLng);
-    const labelCp = stationCp.add(cfg.offset);
-    const labelLatLng = map.containerPointToLatLng(labelCp);
+    const cls = dirNames[i % dirNames.length];
+    const stationPx = map.project(stationLatLng, targetZoom);
+    const labelPx = stationPx.add(offsetFor[cls]);
+    const labelLatLng = map.unproject(labelPx, targetZoom);
     L.polyline([stationLatLng, labelLatLng], {
       color: "#1a1a1a",
       weight: 1,
@@ -273,7 +313,7 @@ function drawStations(geojson, color) {
     }).addTo(layer);
     const icon = L.divIcon({
       className: "station-label-wrap",
-      html: `<span class="station-name station-${cfg.cls}">${escapeHtml(name)}</span>`,
+      html: `<span class="station-name station-${cls}">${escapeHtml(name)}</span>`,
       iconSize: [1, 1],
       iconAnchor: [0, 0],
     });
@@ -415,19 +455,31 @@ function drawRouteOnCanvas(ctx, color, proj) {
   if (el("optStations").checked) drawStationsOnCanvas(ctx, color, proj);
 }
 
+function canvasDirData(name) {
+  const LEAD = 14;
+  const pad = 5;
+  const boxH = 22;
+  switch (name) {
+    case "right":
+      return { align: "left", textDx: LEAD + pad, textDy: 0, leadDx: LEAD, leadDy: 0 };
+    case "left":
+      return { align: "right", textDx: -(LEAD + pad), textDy: 0, leadDx: -LEAD, leadDy: 0 };
+    case "top":
+      return { align: "center", textDx: 0, textDy: -(LEAD + boxH / 2), leadDx: 0, leadDy: -LEAD };
+    case "bottom":
+      return { align: "center", textDx: 0, textDy: LEAD + boxH / 2, leadDx: 0, leadDy: LEAD };
+    default:
+      return { align: "left", textDx: LEAD + pad, textDy: 0, leadDx: LEAD, leadDy: 0 };
+  }
+}
+
 function drawStationsOnCanvas(ctx, color, proj) {
   ctx.textBaseline = "middle";
   ctx.font = "16px 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif";
   ctx.lineJoin = "round";
-  const LEAD = 14;
   const pad = 5;
   const boxH = 22;
-  const LABEL_DIRS = [
-    { align: "left",  textDx: LEAD + pad,       textDy: 0,              leadDx: LEAD,  leadDy: 0 },
-    { align: "right", textDx: -(LEAD + pad),    textDy: 0,              leadDx: -LEAD, leadDy: 0 },
-    { align: "center", textDx: 0,               textDy: -(LEAD + boxH / 2), leadDx: 0,     leadDy: -LEAD },
-    { align: "center", textDx: 0,               textDy: LEAD + boxH / 2,   leadDx: 0,     leadDy: LEAD },
-  ];
+  const dirNames = getLabelDirNames(state.geojson, proj);
   let idx = 0;
   for (const f of state.geojson.features) {
     if (f.geometry.type !== "Point") continue;
@@ -445,7 +497,8 @@ function drawStationsOnCanvas(ctx, color, proj) {
       idx++;
       continue;
     }
-    const dir = LABEL_DIRS[idx % LABEL_DIRS.length];
+    const dirName = dirNames[idx % dirNames.length];
+    const dir = canvasDirData(dirName);
     const tx = p.x + dir.textDx;
     const ty = p.y + dir.textDy;
     const leadX = p.x + dir.leadDx;
